@@ -1,0 +1,78 @@
+function stringToFloat(str)
+(
+    matchi("*?-*?%{float_value}f*?", str) ? ( // first, try to match for a negative value, i.e. a (series of) numeric character(s), *directly* preceded with '-' character)
+        str = -float_value; // apply negative sign, return float value
+    ) : ( // else, just try to match a (positive) value, i.e. a (series of) numeric character(s)
+        matchi("*?%{float_value}f*?", str) ? 
+        (
+            str = float_value; // return float value
+        );
+    );
+);
+
+function floatToString(float)
+(
+  _float = float;
+  sprintf(#dest, "%{_float}f");
+  #dest;
+);
+
+function adjustItemOffsetUnderMouseIfSelectedElseZoom(proj)
+(
+  #namespace = "adjustItemOffsetUnderMouseIfSelectedElseZoom";
+
+  #prevXKey = "prevX";
+  #prevYKey = "prevY";
+  #prevZKey = "prevZ";
+
+  #prevXVal = #;
+  #prevYVal = #;
+  #prevZVal = #;
+
+  // GetExtState("adjustItemOffsetUnderMouseIfSelectedElseZoom", "prevSelected", stringToFloatInPlace(prevSelected));
+  GetExtState(#prevXVal, #namespace, #prevXKey);
+  GetExtState(#prevYVal, #namespace, #prevYKey);
+  GetExtState(#prevZVal, #namespace, #prevZKey);
+
+  prevX = stringToFloat(#prevXVal);
+  prevY = stringToFloat(#prevYVal);
+  prevZ = stringToFloat(#prevZVal);
+
+  GetMousePosition(x, y);
+  z = GetHZoomLevel();
+
+  SetExtState(#namespace, #prevXKey, floatToString(x), 0);
+  SetExtState(#namespace, #prevYKey, floatToString(y), 0);
+  SetExtState(#namespace, #prevZKey, floatToString(z), 0);
+
+  Undo_BeginBlock2(proj);
+
+  get_action_context(_, _, _, _, _, mousewheel);
+  item = extension_api("BR_ItemAtMouseCursor", position);
+
+  // if zoom level has changed but x & y have not then keep zooming even if cursor is now over selected item
+  keepZooming =  (z != prevZ) && (prevX == x) && (prevY == y);
+  !keepZooming && IsMediaItemSelected(item) ?
+  (
+    take = GetActiveTake(item);
+    source = GetMediaItemTake_Source(take);
+    length = GetMediaSourceLength(source, _);
+    increment = mousewheel / 1500;
+    offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS");
+    newOffset = max(min(offset + increment, length), 0);
+    SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", newOffset);
+  ) : (
+    // adjustZoom(sign(mousewheel), 0, 1, -1);
+    GetSet_ArrangeView2(proj, 0, _x, _y, _start, _end);
+    scrollBy = (_end - _start) * .1 * sign(mousewheel);
+    _end += scrollBy;
+    _start += scrollBy;
+    GetSet_ArrangeView2(proj, 1, _x, _y, _start, _end);
+  );
+
+  UpdateArrange();
+
+  Undo_EndBlock2(proj, "ok", 0);
+);
+
+adjustItemOffsetUnderMouseIfSelectedElseZoom(0);

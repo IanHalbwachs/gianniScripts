@@ -1,0 +1,19 @@
+function adjustItemOffsetUnderMouseIfSelected(proj)
+(
+  Undo_BeginBlock2(proj);
+
+  get_action_context(_, _, _, _, _, mousewheel);
+  item = extension_api("BR_ItemAtMouseCursor", position);
+  take = GetActiveTake(item);
+  source = GetMediaItemTake_Source(take);
+  length = GetMediaSourceLength(source, _);
+  increment = mousewheel / GetHZoomLevel();
+  offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS");
+  newOffset = max(min(offset + increment, length), 0);
+  SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", newOffset);
+
+  UpdateArrange();
+  Undo_EndBlock2(proj, "ok", 0);
+);
+
+adjustItemOffsetUnderMouseIfSelected(0);

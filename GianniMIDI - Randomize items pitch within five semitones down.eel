@@ -1,0 +1,31 @@
+@import my_scripts_lib.eel
+
+function randomizeItemsPitchWithinFiveSemitonesUp(proj)
+(
+
+	itemTotal = CountSelectedMediaItems(proj);
+	i = 0;
+
+	Undo_BeginBlock2(proj);
+
+	while (i < itemTotal) (
+		item = GetSelectedMediaItem(0, i);
+		take = GetmediaItemTake(item, 0);
+		rate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE");
+		rate = rate * semitones(-randInt(5));
+		//s = #;
+		//m = sprintf(s, "%f", eighth);
+		//ShowConsoleMsg(s);
+		SetMediaItemTakeInfo_Value(take, "D_PLAYRATE", rate);
+		i += 1;
+	);
+
+	Undo_EndBlock2(proj, "ok", 0);
+
+	UpdateArrange();
+
+	ok;
+);
+
+
+randomizeItemsPitchWithinFiveSemitonesUp();

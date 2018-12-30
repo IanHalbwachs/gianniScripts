@@ -1,0 +1,14 @@
+function moveStartOfArrangeViewToEditCursor(proj)
+(
+  Undo_BeginBlock2(proj);
+  GetSet_ArrangeView2(proj, 0, _, _, start, end);
+  length = end - start;
+  cursorPosition = GetCursorPosition();
+  GetSet_ArrangeView2(proj, 1, _, _, cursorPosition, cursorPosition + length);
+
+  UpdateArrange();
+
+  Undo_EndBlock2(proj, "ok", 0);
+);
+
+moveStartOfArrangeViewToEditCursor(0);

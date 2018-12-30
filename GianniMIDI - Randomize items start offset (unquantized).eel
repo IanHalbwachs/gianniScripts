@@ -1,0 +1,37 @@
+/*
+ * EEL script for REAPER v5+
+ *
+ * Copyright (C) 2015 Przemyslaw Pawelczyk <przemoc@gmail.com>
+ *
+ * This script is licensed under the terms of the MIT license.
+ * https://opensource.org/licenses/MIT
+ */
+
+
+/// Returns 1 if successful
+function randomizeItemsStartOffsetUnquantized(proj)
+(
+
+	itemTotal = CountSelectedMediaItems(proj);
+	i = 0;
+
+	Undo_BeginBlock2(proj);
+
+	while (i < itemTotal) (
+		item = GetSelectedMediaItem(0, i);
+		take = GetmediaItemTake(item, 0);
+		source = GetMediaItemTake_Source(take);
+		length = GetMediaSourceLength(source, _);
+		SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", rand(length));
+		i += 1;
+	);
+
+	Undo_EndBlock2(proj, "ok", 0);
+
+	UpdateArrange();
+
+	ok;
+);
+
+
+randomizeItemsStartOffsetUnquantized();

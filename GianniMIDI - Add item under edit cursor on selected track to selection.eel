@@ -1,0 +1,48 @@
+/*
+ * EEL script for REAPER v5+
+ *
+ * Copyright (C) 2015 Przemyslaw Pawelczyk <przemoc@gmail.com>
+ *
+ * This script is licensed under the terms of the MIT license.
+ * https://opensource.org/licenses/MIT
+ */
+
+
+/// Returns 1 if successful
+function addItemUnderCursorOnSelectedTrackToSelection(proj)
+(
+
+	itemTotal = 0;
+	editCursorPosition = GetCursorPositionEx(proj);
+	format_timestr_pos(editCursorPosition, editCursorPositionstr, -1);
+
+	trackCount = CountTracks(proj);
+	trackIndex = -1;
+	selectedTrackIndex = -1;
+	while ( ((trackIndex += 1) < trackCount) && selectedTrackIndex == -1) (
+		IsTrackSelected(GetTrack(0, trackIndex)) && selectedTrackIndex = trackIndex;
+	);
+
+	Undo_BeginBlock2(proj);
+	track = getTrack(0, selectedTrackIndex);
+	itemCount = GetTrackNumMediaItems(track);
+	itemIndex = -1;
+	while (
+		((itemIndex += 1) < itemCount) && (item = GetTrackMediaItem(track, itemIndex))
+	 ) (
+		itemBeg = GetMediaItemInfo_Value(item, "D_POSITION");
+		itemEnd = itemBeg + GetMediaItemInfo_Value(item, "D_LENGTH");
+		(editCursorPosition >= itemBeg && editCursorPosition <= itemEnd) &&(
+			SetMediaItemInfo_Value(item, "B_UISEL", 1);
+			ok = 1;
+		);
+	);
+	Undo_EndBlock2(proj, "ok", 0);
+
+	UpdateArrange();
+
+	ok;
+);
+
+
+addItemUnderCursorOnSelectedTrackToSelection(0);

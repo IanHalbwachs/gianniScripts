@@ -1,0 +1,25 @@
+function round(num) local (int)
+(
+  int = floor(num);
+  num - int < 0.5 ? floor(num) : ceil(num);
+);
+
+function randInt(num)
+(
+  round(rand() * num);
+);
+
+function clamp(num, min, max)
+(
+  max(min(num, max), min);
+);
+
+function isWithin(lo, hi, num)
+(
+  num >= lo && num <= hi;
+);
+
+function semitones(s)
+(
+  (2 ^ (1/12)) ^ s;
+);
