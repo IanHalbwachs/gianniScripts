@@ -1,7 +1,7 @@
 --select first item of selected track in first project
 
 --position in track of item we're interested in
-position = 0;
+position = 2;
 
 --get pointer to item we're interested in
 firstProject = reaper.EnumProjects(0, '')
